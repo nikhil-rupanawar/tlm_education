@@ -4,6 +4,13 @@ ChatTemplate  - joins messages into ONE token stream with role markers.
 ChatSession   - keeps history, re-sends it every turn, trims to the context budget, streams.
 ToolLoop      - think -> act -> observe loop around any model function.
 Arithmetic    - multi-step reliability, majority vote, best-of-n, loop token cost.
+
+Guide mapping (Chapter 21): the model only ever continues ONE token stream. Everything that
+makes it feel like an app - roles, memory of the chat, tools, retries - is ordinary code here.
+  Chat template .......... ChatTemplate.render  (Llama's apply_chat_template)
+  Chat interface ......... ChatSession          ("the model remembers our chat" - myth; we re-send)
+  Loop / agent ........... ToolLoop             (think -> act -> observe)
+  Reliability, voting .... chain_success, majority_vote, best_of_n, loop_input_tokens
 """
 from __future__ import annotations
 
@@ -51,7 +58,11 @@ class ChatTemplate:
 
 @dataclass
 class ChatSession:
-    """What a chat app does. The model keeps nothing between turns; the session re-sends history."""
+    """What a chat app does. The model keeps nothing between turns; the session re-sends history.
+
+    Ch 21: turn 20 of a chat re-sends ~10,000 tokens (~1.2 GB of KV cache on Llama 8B, Ch 17).
+    When the history no longer fits max_context, the oldest turns are dropped.
+    """
     model: TLM
     tok: WordTokenizer
     system: str = ""
@@ -127,20 +138,20 @@ class ToolLoop:
 
 # ------------------------------------------------------------------ harness arithmetic
 def chain_success(p_step: float, steps: int) -> float:
-    """All steps must succeed: p^n (assumes independent steps)."""
+    """All steps must succeed: p^n (assumes independent steps). Ch 21: 95% per step, 10 steps -> 59.9%."""
     return p_step ** steps
 
 
 def majority_vote(p: float, n: int) -> float:
-    """P(more than half of n independent binary answers are right)."""
+    """P(more than half of n independent binary answers are right). Ch 21: 5 votes at 60% -> 68.3%."""
     return sum(comb(n, k) * p ** k * (1 - p) ** (n - k) for k in range(n // 2 + 1, n + 1))
 
 
 def best_of_n(p: float, n: int) -> float:
-    """P(at least one of n tries is right), given a perfect checker."""
+    """P(at least one of n tries is right), given a perfect checker. Ch 21: 5 tries at 30% -> 83.2%."""
     return 1 - (1 - p) ** n
 
 
 def loop_input_tokens(tokens_per_turn: int, turns: int) -> int:
-    """Each turn re-sends everything so far."""
+    """Each turn re-sends everything so far. Ch 21: 10 turns x 2,000 tokens -> 110,000 input tokens."""
     return tokens_per_turn * turns * (turns + 1) // 2

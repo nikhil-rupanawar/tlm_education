@@ -147,6 +147,22 @@ def test_predict_custom_text(tmp_path):
     assert "cat" in out.split("AFTER")[1].splitlines()[1]       # top prediction after 'the'
 
 
+def test_rl_demo_output():
+    from tlm.rl_demo import run
+    out = run()
+    assert "beta 0.0       tea   0.0%  coffee 100.0%" in out
+    assert "coffee  78.5%" in out and "theory coffee  78.5%" in out     # lands on kl_optimum
+    final = out.split("mean reward")[1].splitlines()[0]
+    assert final.rstrip().endswith("+1.00")                            # sampled RL learns the rule
+    assert "error" not in out
+
+
+def test_rl_cli_rejects_unknown_word(capsys):
+    from tlm.__main__ import main
+    main(["rl", "--reward", "xyz"])
+    assert "unknown word 'xyz'" in capsys.readouterr().out
+
+
 def test_cli_entrypoint(capsys):
     from tlm.__main__ import main
     main(["predict", "I hate", "--samples", "3"])

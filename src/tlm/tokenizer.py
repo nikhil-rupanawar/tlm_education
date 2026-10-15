@@ -1,6 +1,12 @@
 """Word-level tokenizer (Chapter 2).
 
 Real models use sub-word BPE tokenizers; a word tokenizer keeps the ids readable.
+
+Guide mapping (Chapter 2):
+  * The tokenizer is not learned and holds no weights; it is built once and never changes.
+  * Ids are the row numbers of the embedding table (Ch 4).
+  * Guide vocabulary: I=0 love=1 tea=2 coffee=3 hate=4 rain=5 (Llama 3.1: 128,256 sub-word tokens,
+    ~3.94 characters per token on English). Prices, limits and speed are counted in tokens.
 """
 from __future__ import annotations
 
@@ -17,7 +23,11 @@ class WordTokenizer:
 
     @classmethod
     def build(cls, texts: Iterable[str], specials: Sequence[str] = ()) -> "WordTokenizer":
-        """Vocabulary = special tokens, then every distinct word in order of first appearance."""
+        """Vocabulary = special tokens, then every distinct word in order of first appearance.
+
+        Same as the guide's  {w: i for i, w in enumerate(dict.fromkeys(words))}.
+        Specials are the chat markers of Ch 21 (harness.SPECIALS); the guide's toy has none.
+        """
         words: List[str] = list(specials)
         for t in texts:
             words.extend(t.split())
@@ -27,6 +37,7 @@ class WordTokenizer:
         return len(self.vocab)
 
     def encode(self, text: str) -> List[int]:
+        """Text -> pieces -> ids:  "I love" -> ["I", "love"] -> [0, 1]  (Ch 2 table, steps 1-3)."""
         try:
             return [self.ids[w] for w in text.split()]
         except KeyError as e:

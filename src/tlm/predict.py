@@ -1,4 +1,8 @@
-"""Next-token prediction demo: python -m tlm predict "I love" """
+"""Next-token prediction demo: python -m tlm predict "I love"
+
+Chapters 1-14 end to end: tokenize (2), random birth (4), the BEFORE bars (Stage 2, first run),
+train (10-12), the AFTER bars (13: tea ~66%, coffee ~33%), then greedy vs sampled picks (14).
+"""
 from __future__ import annotations
 
 import argparse
@@ -10,7 +14,7 @@ from .model import TLM, Config
 from .tokenizer import WordTokenizer
 from .train import SGD, train
 
-DEFAULT_TEXT = ["I love tea", "I love tea", "I love coffee", "I hate rain"]
+DEFAULT_TEXT = ["I love tea", "I love tea", "I love coffee", "I hate rain"]   # Ch 1's training text
 
 
 def bars(model: TLM, tok: WordTokenizer, prompt: str, title: str, temperature: float = 1.0) -> str:

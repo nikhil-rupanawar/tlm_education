@@ -1,4 +1,15 @@
-"""Scale arithmetic (Chapters 15-18) for a Llama-style model. Default: Llama 3.1 8B config."""
+"""Scale arithmetic (Chapters 15-18) for a Llama-style model. Default: Llama 3.1 8B config.
+
+Guide mapping - the "SCALE IT UP" boxes, as code:
+  Ch 3  params()                     80 toy weights -> 8.03 B
+  Ch 16 flops_per_token()            ~2 x params multiply-adds per token (every weight used once)
+  Ch 1  train_flops()                6 x params x tokens (15 T tokens -> ~7 x 10^23)
+  Ch 17 weight_bytes, kv_bytes*      weights 16 GB at 16-bit; KV 128 KiB/token: 8,192 tok = 1 GiB,
+                                     131,072 tok = 16 GiB (= the weights), 10 users x 32,768 = 40 GiB
+  Ch 18 decode_ceiling_tokens_per_s  bandwidth-bound: 3.35 TB/s / 16 GB ~ 209 tokens/s, 1 user
+  Ch 12 train_memory_bytes           16 bytes/weight with Adam -> ~128 GB
+  Ch 19 lora_params                  rank 16 on q, v -> ~6.8 M (~0.08%)
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -20,16 +31,17 @@ class LlamaShape:
 
     def params(self) -> int:
         d, kv = self.d_model, self.n_kv_heads * self.d_head
-        attn = d * d + 2 * d * kv + d * d
+        attn = d * d + 2 * d * kv + d * d             # Wq, Wk+Wv (8 shared KV heads), Wo  (toy: 24 + 8)
         ffn = 3 * d * self.d_ff                       # SwiGLU: gate, up, down
         norms = 2 * d
-        emb = self.vocab * d * (1 if self.tied else 2)
+        emb = self.vocab * d * (1 if self.tied else 2)  # input + output tables, 525 M each (toy: tied, 24)
         return self.n_layers * (attn + ffn + norms) + emb + d
 
     def weight_bytes(self, bytes_per_weight: float = 2.0) -> float:
         return self.params() * bytes_per_weight
 
     def kv_bytes_per_token(self, bytes_per_value: float = 2.0) -> float:
+        # one K and one V row per layer per KV head (Ch 15's cache): 2 x 32 x 8 x 128 x 2 B = 128 KiB
         return 2 * self.n_layers * self.n_kv_heads * self.d_head * bytes_per_value
 
     def kv_bytes(self, tokens: int, users: int = 1, bytes_per_value: float = 2.0) -> float:

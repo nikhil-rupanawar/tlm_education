@@ -1,4 +1,4 @@
-"""python -m tlm {guide|predict|chat|scale|harness}"""
+"""python -m tlm {guide|predict|rl|chat|scale|harness}"""
 import sys
 
 
@@ -11,6 +11,9 @@ def main(argv=None):
     elif cmd == "predict":
         from .predict import main as pmain
         pmain(argv[1:])
+    elif cmd == "rl":
+        from .rl_demo import main as rmain
+        rmain(argv[1:])
     elif cmd == "chat":
         from .chat_demo import repl
         repl()
@@ -27,6 +30,7 @@ def main(argv=None):
         print(__doc__)
         print("  guide    reproduce every tiny-model number in the guide")
         print('  predict  train the tiny model and show its next-token prediction, e.g. predict "I love"')
+        print("  rl       reinforcement learning: reward a word, see the KL trade-off (Ch 20)")
         print("  chat     train a small café chat model and talk to it")
         print("  scale    Llama 3.1 8B memory / compute / speed arithmetic")
         print("  harness  reliability, voting and loop-cost arithmetic")
