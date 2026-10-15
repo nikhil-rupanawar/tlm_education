@@ -1,0 +1,42 @@
+== Stage 1: design ==
+vocabulary ['I', 'love', 'tea', 'coffee', 'hate', 'rain']   weights 80
+
+== Stage 2: first run (random weights) ==
+I love -> I  12.0%  love  19.8%  tea  18.0%  coffee  17.6%  hate  16.1%  rain  16.5%
+
+== Stage 3: train (SGD, lr 0.1, 500 steps) ==
+gradient check on W2: max |analytic - numeric| = 8.16e-12
+step   0  loss 1.864  tea  18.0% coffee  17.6% rain  16.5%   I->love  13.9% hate  14.8%   cos(tea,coffee) -0.00
+step  10  loss 1.745  tea  18.8% coffee  18.0% rain  16.0%   I->love  17.9% hate  15.5%   cos(tea,coffee) 0.21
+step  25  loss 1.641  tea  21.5% coffee  18.8% rain  14.4%   I->love  21.2% hate  14.4%   cos(tea,coffee) 0.40
+step  50  loss 1.356  tea  36.7% coffee  22.0% rain   8.4%   I->love  32.4% hate   9.3%   cos(tea,coffee) 0.61
+step 100  loss 0.862  tea  60.2% coffee  26.4% rain   8.3%   I->love  69.8% hate   5.6%   cos(tea,coffee) 0.81
+step 150  loss 0.630  tea  63.1% coffee  30.0% rain   4.4%   I->love  74.7% hate  14.3%   cos(tea,coffee) 0.88
+step 200  loss 0.559  tea  65.3% coffee  31.2% rain   1.1%   I->love  80.1% hate  17.7%   cos(tea,coffee) 0.90
+step 300  loss 0.534  tea  66.5% coffee  32.4% rain   0.4%   I->love  80.8% hate  18.7%   cos(tea,coffee) 0.91
+step 500  loss 0.523  tea  66.6% coffee  33.1% rain   0.2%   I->love  76.6% hate  23.2%   cos(tea,coffee) 0.92
+
+== Stage 4: use ==
+temperature 0.5: tea  80.2% coffee  19.8% rain   0.0%
+temperature 1.0: tea  66.6% coffee  33.1% rain   0.2%
+temperature 2.0: tea  55.0% coffee  38.8% rain   2.9%
+after 'I love tea' (never trained): rain  94.5%
+KV cache gives identical logits to full recompute: True
+
+== Stage 6a: full fine-tune on 'I love coffee' x3 ==
+step  0  coffee  33.1%  I->hate  23.2%  loss on original text 0.523
+step  5  coffee  97.2%  I->hate   1.9%  loss on original text 1.412
+step 10  coffee  98.5%  I->hate   1.0%  loss on original text 1.640
+step 20  coffee  99.2%  I->hate   0.5%  loss on original text 1.905
+step 40  coffee  99.7%  I->hate   0.2%  loss on original text 2.204
+
+== Stage 6b: LoRA rank 1 on W2 (7 trainable numbers) ==
+step  0  coffee  33.1%  I->hate  23.2%  loss on original text 0.523
+step  5  coffee  34.4%  I->hate  23.0%  loss on original text 0.523
+step 10  coffee  36.2%  I->hate  22.6%  loss on original text 0.524
+step 20  coffee  44.1%  I->hate  21.2%  loss on original text 0.533
+step 40  coffee  80.6%  I->hate  14.2%  loss on original text 0.743
+
+== Stage 6c: RL, reward coffee = 1 ==
+beta 0.0: coffee 100.0%  KL 1.105  loss on original text 3.796
+beta 0.5: coffee  78.5%  KL 0.434  loss on original text 0.701   theory  78.5%

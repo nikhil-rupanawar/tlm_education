@@ -1,0 +1,25 @@
+# Python environment and build output
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Test and tool caches
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Models trained locally (tlm chat saves these) - rebuilt by running it
+tlm_chat.npz
+tlm_chat.vocab.json
+*.npz
+
+# Editor and OS clutter
+.DS_Store
+.idea/
+.vscode/

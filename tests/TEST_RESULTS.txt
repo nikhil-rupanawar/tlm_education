@@ -1,0 +1,38 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.7.0 -- /tmp/claude-0/venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/claude/tlm
+configfile: pyproject.toml
+collecting ... collected 29 items
+
+tests/test_more.py::test_tokenizer_order_roundtrip_and_errors PASSED [  3%]
+tests/test_more.py::test_sampling_greedy_temperature_top_p PASSED [  6%]
+tests/test_more.py::test_generate_respects_stop_and_max_new PASSED [ 10%]
+tests/test_more.py::test_loss_starts_near_uniform_and_falls PASSED [ 13%]
+tests/test_more.py::test_adam_trains_too PASSED       [ 17%]
+tests/test_more.py::test_learning_rate_too_high_blows_up PASSED [ 20%]
+tests/test_more.py::test_frozen_keys_do_not_move PASSED [ 24%]
+tests/test_more.py::test_masked_loss_ignores_unmasked_targets PASSED [ 27%]
+tests/test_more.py::test_finetune_shifts_behaviour_and_causes_forgetting PASSED [ 31%]
+tests/test_more.py::test_rl_sampled_raises_reward PASSED [ 34%]
+tests/test_more.py::test_chat_session_resends_history_and_trims PASSED [ 37%]
+tests/test_more.py::test_chat_demo_end_to_end PASSED  [ 41%]
+tests/test_more.py::test_predict_demo_output PASSED   [ 44%]
+tests/test_more.py::test_predict_custom_text PASSED   [ 48%]
+tests/test_more.py::test_cli_entrypoint PASSED        [ 51%]
+tests/test_tlm.py::test_analytic_gradients_match_numeric[0-1] PASSED [ 55%]
+tests/test_tlm.py::test_analytic_gradients_match_numeric[0-2] PASSED [ 58%]
+tests/test_tlm.py::test_analytic_gradients_match_numeric[8-2] PASSED [ 62%]
+tests/test_tlm.py::test_kv_cache_matches_full_forward[0] PASSED [ 65%]
+tests/test_tlm.py::test_kv_cache_matches_full_forward[8] PASSED [ 68%]
+tests/test_tlm.py::test_guide_initial_state_exact PASSED [ 72%]
+tests/test_tlm.py::test_guide_reproduction PASSED     [ 75%]
+tests/test_tlm.py::test_rl_matches_closed_form PASSED [ 79%]
+tests/test_tlm.py::test_lora_starts_identical_and_counts PASSED [ 82%]
+tests/test_tlm.py::test_chat_template_and_mask PASSED [ 86%]
+tests/test_tlm.py::test_tool_loop PASSED              [ 89%]
+tests/test_tlm.py::test_harness_arithmetic PASSED     [ 93%]
+tests/test_tlm.py::test_llama_scale PASSED            [ 96%]
+tests/test_tlm.py::test_save_load PASSED              [100%]
+
+======================== 29 passed in 60.67s (0:01:00) =========================
