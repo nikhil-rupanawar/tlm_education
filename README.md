@@ -20,14 +20,14 @@ pytest                      # 29 tests (add -m "not slow" to skip the 1-min chat
 | `tokenizer.py` | 2 | Word tokenizer: vocabulary in order of first appearance, special tokens for chat |
 | `model.py` | 3–9, 13–15 | Embedding → causal attention → ReLU feed-forward (× n layers) → tied output scoring. Forward pass, **analytic backprop**, **KV-cached** streaming generation, temperature / top-p sampling, save/load |
 | `train.py` | 10–12 | Cross-entropy loss (with optional per-token masks), numeric gradient check, SGD and Adam, training loop |
-| `finetune.py` | 19 | Full fine-tuning, and LoRA (`W = W_frozen + A @ B`, B starts at zero) |
-| `rl.py` | 20 | RL with a KL penalty: exact next-token objective (checks against the closed form `p ∝ p_ref·e^(r/β)`), plus sampled policy gradient with group-relative advantages |
-| `harness.py` | 21 | Chat template, `ChatSession` (history re-sent every turn, trimming, streaming), `ToolLoop`, and harness arithmetic |
-| `scale.py` | 15–18 | Llama-style parameter, memory, KV cache, FLOPs and decode-ceiling calculator |
+| `finetune.py` | 20 | Full fine-tuning, and LoRA (`W = W_frozen + A @ B`, B starts at zero) |
+| `rl.py` | 21 | RL with a KL penalty: exact next-token objective (checks against the closed form `p ∝ p_ref·e^(r/β)`), plus sampled policy gradient with group-relative advantages |
+| `harness.py` | 22 | Chat template, `ChatSession` (history re-sent every turn, trimming, streaming), `ToolLoop`, and harness arithmetic |
+| `scale.py` | 15–19, 23 | Llama-style parameter, memory, KV cache, FLOPs and decode-ceiling calculator |
 | `guide.py` | all | Runs the whole guide story end to end |
 | `predict.py` | 9, 13–14 | Next-token demo: probability bars before/after training, greedy vs sampled (`--text`, `--temperature`, `--steps`) |
-| `rl_demo.py` | 20 | RL demo: exact β sweep against theory, then sampled GRPO-style RL with a reward rule (`--reward`, `--penalize`, `--beta`) |
-| `chat_demo.py` | 21 | Trains a ~9K-weight chat model on café dialogues and opens a REPL |
+| `rl_demo.py` | 21 | RL demo: exact β sweep against theory, then sampled GRPO-style RL with a reward rule (`--reward`, `--penalize`, `--beta`) |
+| `chat_demo.py` | 22 | Trains a ~9K-weight chat model on café dialogues and opens a REPL |
 
 ## Next-token demo
 
@@ -42,7 +42,7 @@ python -m tlm predict "the cat" --text my.txt     # your own sentences, one per 
 
 The use case: a café owns the model trained on the guide's four sentences. It wants coffee recommended more and
 "hate" never said, without writing new training text. RL swaps "compare with the text" for "try answers, score
-them with a rule, push up the good ones" (Chapter 20).
+them with a rule, push up the good ones" (Chapter 21).
 
 ```
 python -m tlm rl                                  # reward coffee +1, hate -1; beta 0 and 0.5
@@ -51,8 +51,8 @@ python -m tlm rl --penalize "" --steps 60         # no penalty word, longer samp
 ```
 
 - **Part 1, exact** (the guide's experiment, one decision after "I love"). With β 0 coffee reaches 100% and the
-  loss on the original text jumps from 0.523 to about 3.8. With β 0.5 coffee settles at 78.5%, which is what
-  `p ∝ p_ref·e^(r/β)` predicts (the guide prints 78.7%).
+  loss on the original text jumps from 0.523 to 3.796. With β 0.5 coffee settles at 78.5%, which is what
+  `p ∝ p_ref·e^(r/β)` predicts, as in the guide.
 - **Part 2, sampled.** From "I", sample 8 two-word answers, score them, and compare each with the group average:
   above average is pushed up, below is pushed down, with a KL penalty to the starting model. Mean reward goes
   from 0 to 1 in about 15 steps.

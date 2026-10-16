@@ -1,7 +1,8 @@
 """Reproduce every tiny-model number in the guide 'Arithmetic Intelligence'.
 
 One section per guide stage; each prints the numbers its chapters quote (python -m tlm guide).
-Stage 5 (Scale, Ch 16-18) has no tiny-model numbers: see scale.py and python -m tlm scale.
+Stage 5 (Scale, Ch 16-19) has no tiny-model numbers: see scale.py and python -m tlm scale.
+Stage 6 (Beyond, Ch 20-23): 6a-6c below; the harness (Ch 22) is harness.py and chat_demo.py.
 """
 from __future__ import annotations
 
@@ -14,7 +15,7 @@ from .tokenizer import WordTokenizer
 from .train import SGD, loss_and_grads, numeric_grad, train
 
 CORPUS = ["I love tea", "I love tea", "I love coffee", "I hate rain"]   # Ch 1
-FINETUNE_TEXT = ["I love coffee"] * 3                                  # Ch 19
+FINETUNE_TEXT = ["I love coffee"] * 3                                  # Ch 20
 
 
 def cos(a, b):
@@ -79,7 +80,7 @@ def run(verbose: bool = True) -> dict:
     out["kv_same"] = bool(same)
     trained = model.copy()
 
-    say("\n== Stage 6a: full fine-tune on 'I love coffee' x3 ==")   # Ch 19 option 1: all 80 weights move
+    say("\n== Stage 6a: full fine-tune on 'I love coffee' x3 ==")   # Ch 20 option 1: all 80 weights move
     ft_data = [tok.encode(s) for s in FINETUNE_TEXT]
     m = trained.copy()
     def cbf(step, L, mm):
@@ -89,7 +90,7 @@ def run(verbose: bool = True) -> dict:
             say(f"step {step:2d}  coffee {pct(pp[coffee])}  I->hate {pct(q[hate])}  loss on original text {old:.3f}")
     finetune(m, ft_data, steps=40, callback=cbf)
 
-    say("\n== Stage 6b: LoRA rank 1 on W2 (7 trainable numbers) ==")   # Ch 19 option 2: forgets far less
+    say("\n== Stage 6b: LoRA rank 1 on W2 (7 trainable numbers) ==")   # Ch 20 option 2: forgets far less
     lora = LoRA(trained.copy(), targets=[k], rank=1, seed=0)
     def cbl(step, L, lo):
         if step in (0, 5, 10, 20, 40):
@@ -98,7 +99,7 @@ def run(verbose: bool = True) -> dict:
             say(f"step {step:2d}  coffee {pct(pp[coffee])}  I->hate {pct(q[hate])}  loss on original text {old:.3f}")
     lora.train(ft_data, steps=40, lr=0.1, callback=cbl)
 
-    say("\n== Stage 6c: RL, reward coffee = 1 ==")              # Ch 20: reward - beta x KL
+    say("\n== Stage 6c: RL, reward coffee = 1 ==")              # Ch 21: reward - beta x KL
     r = np.zeros(len(tok)); r[coffee] = 1.0
     for beta in (0.0, 0.5):
         mm = trained.copy()

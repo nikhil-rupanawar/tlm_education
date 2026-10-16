@@ -1,4 +1,4 @@
-"""Fine-tuning and LoRA (Chapter 19).
+"""Fine-tuning and LoRA (Chapter 20).
 
 Guide mapping:
   Option 1  full fine-tune ... finetune(): same loop as Ch 12, start from trained weights,

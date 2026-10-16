@@ -1,4 +1,4 @@
-"""Scale arithmetic (Chapters 15-18) for a Llama-style model. Default: Llama 3.1 8B config.
+"""Scale arithmetic (Chapters 15-19, 23) for a Llama-style model. Default: Llama 3.1 8B config.
 
 Guide mapping - the "SCALE IT UP" boxes, as code:
   Ch 3  params()                     80 toy weights -> 8.03 B
@@ -8,7 +8,10 @@ Guide mapping - the "SCALE IT UP" boxes, as code:
                                      131,072 tok = 16 GiB (= the weights), 10 users x 32,768 = 40 GiB
   Ch 18 decode_ceiling_tokens_per_s  bandwidth-bound: 3.35 TB/s / 16 GB ~ 209 tokens/s, 1 user
   Ch 12 train_memory_bytes           16 bytes/weight with Adam -> ~128 GB
-  Ch 19 lora_params                  rank 16 on q, v -> ~6.8 M (~0.08%)
+  Ch 19 weight_bytes(1 / 0.5)        fewer bits: same model at 8-bit ~8 GB, 4-bit ~4-5 GB
+  Ch 20 lora_params                  rank 16 on q, v -> ~6.8 M (~0.08%)
+  Ch 23 report()                     the numbers for picking a model: fit, speed, cost
+(The guide calls it "the 8B model"; its shape is Llama 3.1 8B's.)
 """
 from __future__ import annotations
 

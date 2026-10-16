@@ -1,4 +1,4 @@
-"""Reinforcement learning with a KL penalty (Chapter 20).
+"""Reinforcement learning with a KL penalty (Chapter 21).
 
 Two tools:
   * rl_next_token_exact  - the guide's experiment: maximise  E[reward] - beta * KL(pi || pi_ref)
@@ -6,17 +6,15 @@ Two tools:
   * rl_sampled           - the general recipe: sample a group of answers, score them, use
                            group-relative advantages (GRPO-style) plus a KL penalty.
 
-Guide mapping (Chapter 20): the loop changes in one place - instead of comparing with a text,
+Guide mapping (Chapter 21): the loop changes in one place - instead of comparing with a text,
 the model tries answers, a reward rule scores them, and good answers get their share pushed up.
   1 Try answers ............. rl_sampled: model.generate(...) x group
   2 Reward each one ......... the cafe rule: coffee = 1, anything else = 0
   3 Compare to the group .... group_advantages: [0,1,0,0] -> [-0.58, 1.73, -0.58, -0.58]
   4 Push up / down + penalty  objective = reward - beta x KL (kl, _dlogits_objective)
 Results to expect (python -m tlm guide, Stage 6c; python -m tlm rl):
-  beta 0   -> coffee 100%, loss on the original text 0.523 -> ~3.8 (it gave up everything else)
+  beta 0   -> coffee 100%, loss on the original text 0.523 -> 3.796 (it gave up everything else)
   beta 0.5 -> coffee 78.5%, exactly kl_optimum's  new share ∝ old share x e^(reward / beta)
-  (The guide prints 78.7% and 3.908; this code's trained start is a hair different, and the
-   training still lands on its own theory number.)
 """
 from __future__ import annotations
 
@@ -28,15 +26,15 @@ from .model import TLM, softmax
 
 
 def kl(p: np.ndarray, q: np.ndarray) -> float:
-    """KL divergence (Ch 20): grows as the new percentages p drift from the original model's q."""
+    """KL divergence (Ch 21): grows as the new percentages p drift from the original model's q."""
     return float(np.sum(p * (np.log(p) - np.log(q))))
 
 
 def kl_optimum(p_ref: np.ndarray, reward: np.ndarray, beta: float) -> np.ndarray:
     """Closed-form best policy for E[r] - beta*KL:  p* ∝ p_ref * exp(r / beta).
 
-    The guide's theory check: p_ref (tea 0.66, coffee 0.33), r = coffee 1, beta 0.5 -> coffee ~78.5%
-    (guide: 78.7%); beta 1 -> ~57.4% (guide: 57.6%). The training in rl_next_token_exact lands on this number.
+    The guide's theory check: p_ref (tea 0.66, coffee 0.33), r = coffee 1, beta 0.5 -> coffee 78.5%;
+    beta 1 -> 57.4%. The training in rl_next_token_exact lands on this number.
     """
     w = p_ref * np.exp(reward / beta)
     return w / w.sum()
@@ -75,7 +73,7 @@ def rl_next_token_exact(model: TLM, prompt: Sequence[int], reward: np.ndarray, b
 
 
 def group_advantages(rewards: Sequence[float]) -> np.ndarray:
-    """Ch 20 step 3: score each answer against its group (GRPO, as used for DeepSeek-R1).
+    """Ch 21 step 3: score each answer against its group (GRPO, as used for DeepSeek-R1).
     No reward model or value network needed: the group's own average is the baseline."""
     r = np.asarray(rewards, dtype=float)
     sd = r.std()

@@ -30,7 +30,7 @@ def main(argv=None):
         print(__doc__)
         print("  guide    reproduce every tiny-model number in the guide")
         print('  predict  train the tiny model and show its next-token prediction, e.g. predict "I love"')
-        print("  rl       reinforcement learning: reward a word, see the KL trade-off (Ch 20)")
+        print("  rl       reinforcement learning: reward a word, see the KL trade-off (Ch 21)")
         print("  chat     train a small café chat model and talk to it")
         print("  scale    Llama 3.1 8B memory / compute / speed arithmetic")
         print("  harness  reliability, voting and loop-cost arithmetic")

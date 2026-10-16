@@ -1,4 +1,4 @@
-"""RL demo (Chapter 20): python -m tlm rl
+"""RL demo (Chapter 21): python -m tlm rl
 
 Use case: a café owns the model trained on the guide's four sentences (Ch 1). It wants the model
 to recommend coffee more, and never to say "hate" - without writing any new training text.
@@ -86,7 +86,7 @@ def run(reward_word: str = "coffee", penalize: Optional[str] = "hate", betas=(0.
     answers = [base.generate([I], max_new=2, temperature=1.0, rng=rng) for _ in range(group)]
     rewards = [reward_fn([I], a) for a in answers]
     adv = group_advantages(rewards)
-    out.append(f"one group of {group} sampled answers, before RL (steps 1-3 of Ch 20):")
+    out.append(f"one group of {group} sampled answers, before RL (steps 1-3 of Ch 21):")
     for a, rw, ad in zip(answers, rewards, adv):
         out.append(f"  I {tok.decode(a):12s} reward {rw:+.0f}   advantage {ad:+.2f}"
                    f"  -> {'pushed up' if ad > 0 else 'pushed down' if ad < 0 else 'unchanged'}")
@@ -112,7 +112,7 @@ def run(reward_word: str = "coffee", penalize: Optional[str] = "hate", betas=(0.
 
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(prog="python -m tlm rl",
-                                 description="Reinforcement learning on the tiny model (guide Chapter 20).")
+                                 description="Reinforcement learning on the tiny model (guide Chapter 21).")
     ap.add_argument("--reward", default="coffee", help="word that scores +1 (default: coffee)")
     ap.add_argument("--penalize", default="hate", help='word that scores -1 (default: hate; "" for none)')
     ap.add_argument("--beta", type=float, nargs="+", default=[0.0, 0.5], help="KL penalty weights for part 1")
